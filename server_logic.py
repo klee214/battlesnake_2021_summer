@@ -8,6 +8,42 @@ We have started this for you, with a function to help remove the 'neck' directio
 from the list of possible moves!
 """
 
+## Finding and getting a next body locations
+def get_next_body(origin_bodies, next_move):
+  copy_bodies = origin_bodies.copy()
+  head = origin_bodies[0]
+
+  if next_move == "up":
+    for i in range(len(origin_bodies)): 
+      if i == 0:
+        copy_bodies[0] == {"x" : head["x"], "y": head["y"] + 1}
+      else:
+        copy_bodies[i] = origin_bodies[i-1]
+
+  if next_move == "down":
+    for i in range(len(origin_bodies)): 
+      if i == 0:
+        copy_bodies[0] == {"x" : head["x"], "y": head["y"] - 1}
+      else:
+        copy_bodies[i] = origin_bodies[i-1]
+
+  if next_move == "left":
+    for i in range(len(origin_bodies)): 
+      if i == 0:
+        copy_bodies[0] == {"x" : head["x"] - 1, "y": head["y"]}
+      else:
+        copy_bodies[i] = origin_bodies[i-1]
+
+  if next_move == "right":
+    for i in range(len(origin_bodies)): 
+      if i == 0:
+        copy_bodies[0] == {"x" : head["x"] + 1, "y": head["y"] + 1}
+      else:
+        copy_bodies[i] = origin_bodies[i-1]
+        
+  return copy_bodies
+## end of the function  
+
 
 def avoid_my_neck(my_head: Dict[str, int], my_body: List[dict], possible_moves: List[str]) -> List[str]:
     """
@@ -72,12 +108,26 @@ def choose_move(data: dict) -> str:
       possible_moves.remove("right")
 
     if data["you"]["head"]["y"] == 0:
-      possible_moves.remove("up")
-
-    if data["you"]["head"]["y"] == board_height - 1:
       possible_moves.remove("down")
 
+    if data["you"]["head"]["y"] == board_height - 1:
+      possible_moves.remove("up")
+
     # TODO Using information from 'data', don't let your Battlesnake pick a move that would hit its own body
+
+    for move in possible_moves:
+      if move == "up":
+        next_head = {"x": data["you"]["head"]["x"], "y": data["you"]["head"]["y"] + 1}
+
+        next_body = get_next_body(data["you"]["body"])
+
+        if next_head in data["you"]["body"]:
+          possible_moves.remove("up")
+
+      if move == "down":
+
+      if move == "left":
+      if move == "right":
 
     # TODO: Using information from 'data', don't let your Battlesnake pick a move that would collide with another Battlesnake
 
