@@ -1,6 +1,8 @@
 import random
 from typing import List, Dict
 
+import numpy as np
+
 """
 This file can be a nice home for your move logic, and to write helper functions.
 
@@ -40,7 +42,7 @@ def get_next_body(origin_bodies, next_move):
         copy_bodies[0] == {"x" : head["x"] + 1, "y": head["y"] + 1}
       else:
         copy_bodies[i] = origin_bodies[i-1]
-        
+
   return copy_bodies
 ## end of the function  
 
@@ -117,17 +119,44 @@ def choose_move(data: dict) -> str:
 
     for move in possible_moves:
       if move == "up":
-        next_head = {"x": data["you"]["head"]["x"], "y": data["you"]["head"]["y"] + 1}
+        next_body = get_next_body(data["you"]["body"], "up")
+        next_head = next_body[0]
 
-        next_body = get_next_body(data["you"]["body"])
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
 
-        if next_head in data["you"]["body"]:
+        if next_head in next_body_from_3:
           possible_moves.remove("up")
 
       if move == "down":
+        next_body = get_next_body(data["you"]["body"], "down")
+        next_head = next_body[0]
+
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
+
+        if next_head in next_body_from_3:
+          possible_moves.remove("down")
 
       if move == "left":
+        next_body = get_next_body(data["you"]["body"], "left")
+        next_head = next_body[0]
+
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
+
+        if next_head in next_body_from_3:
+          possible_moves.remove("left")
+          
       if move == "right":
+          next_body = get_next_body(data["you"]["body"], "right")
+        next_head = next_body[0]
+
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
+
+        if next_head in next_body_from_3:
+          possible_moves.remove("right")
 
     # TODO: Using information from 'data', don't let your Battlesnake pick a move that would collide with another Battlesnake
 
