@@ -152,6 +152,7 @@ def choose_move(data: dict) -> str:
           next_body = get_next_body(data["you"]["body"], "right")
           next_head = next_body[0]
 
+
         # head does not collide with own head, first, second body
         next_body_from_3 = np.array(next_body)[3:]
 
