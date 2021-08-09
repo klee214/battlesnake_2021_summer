@@ -1,6 +1,8 @@
 import random
 from typing import List, Dict
 
+import numpy as np
+
 """
 This file can be a nice home for your move logic, and to write helper functions.
 
@@ -40,7 +42,7 @@ def get_next_body(origin_bodies, next_move):
         copy_bodies[0] == {"x" : head["x"] + 1, "y": head["y"] + 1}
       else:
         copy_bodies[i] = origin_bodies[i-1]
-        
+
   return copy_bodies
 ## end of the function  
 
@@ -117,22 +119,82 @@ def choose_move(data: dict) -> str:
 
     for move in possible_moves:
       if move == "up":
-        next_head = {"x": data["you"]["head"]["x"], "y": data["you"]["head"]["y"] + 1}
+        next_body = get_next_body(data["you"]["body"], "up")
+        next_head = next_body[0]
 
-        next_body = get_next_body(data["you"]["body"])
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
 
-        if next_head in data["you"]["body"]:
+        if next_head in next_body_from_3:
           possible_moves.remove("up")
 
       if move == "down":
+        next_body = get_next_body(data["you"]["body"], "down")
+        next_head = next_body[0]
+
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
+
+        if next_head in next_body_from_3:
+          possible_moves.remove("down")
 
       if move == "left":
+        next_body = get_next_body(data["you"]["body"], "left")
+        next_head = next_body[0]
+
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
+
+        if next_head in next_body_from_3:
+          possible_moves.remove("left")
+          
       if move == "right":
+          next_body = get_next_body(data["you"]["body"], "right")
+          next_head = next_body[0]
+
+        # head does not collide with own head, first, second body
+        next_body_from_3 = np.array(next_body)[3:]
+
+        if next_head in next_body_from_3:
+          possible_moves.remove("right")
 
     # TODO: Using information from 'data', don't let your Battlesnake pick a move that would collide with another Battlesnake
 
     # TODO: Using information from 'data', make your Battlesnake move towards a piece of food on the board
 
+    # 1. find the closest food from head
+    my_head = data["you"]["head"]
+    foods = data["board"]["food"]
+
+    distance_to_foods = []
+    head_distance = my_head["x"] + my_head["y"]
+
+    index = 0
+    closest_food_index = 0
+
+    for food in foods:
+      food_distance = food["x"] + food["y"] 
+      distance_to_food = abs(food_distance-head_distance)
+
+      if(index > 0) :
+        if(distance_to_food < distance_to_foods[closest_food_index]):
+          closest_food_index = index
+      
+      distance_to_foods.append(distance_to_food)
+      index += 1
+
+    closest_food = distance_to_foods[closest_food_index]
+    # 2. choose move toward the food
+    try:
+      if(closest_food["x"] > my_head["X"]):
+        possible_moves.remove("down")
+      elif(closest_food["x"] < my_head["X"]):
+        possible_moves.remove("up")
+      if(closest_food["y"] > my_head["y"]):
+        possible_moves.remove("left")
+      elif(closest_food["y"] < my_head["y"]):
+        possible_moves.remove("right"))
+    except:
     # Choose a random direction from the remaining possible_moves to move in, and then return that move
     move = random.choice(possible_moves)
     # TODO: Explore new strategies for picking a move that are better than random
