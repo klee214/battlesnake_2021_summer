@@ -12,37 +12,42 @@ from the list of possible moves!
 
 ## Finding and getting a next body locations
 def get_next_body(origin_bodies, next_move):
-  copy_bodies = origin_bodies.copy()
+  copy_bodies = []
   head = origin_bodies[0]
 
   if next_move == "up":
     for i in range(len(origin_bodies)): 
       if i == 0:
-        copy_bodies[0] == {"x" : head["x"], "y": head["y"] + 1}
+        copy_bodies.append({"x" : head["x"], "y": head["y"] + 1})
       else:
-        copy_bodies[i] = origin_bodies[i-1]
+        copy_bodies.append(origin_bodies[i-1])
 
   if next_move == "down":
     for i in range(len(origin_bodies)): 
       if i == 0:
-        copy_bodies[0] == {"x" : head["x"], "y": head["y"] - 1}
+        copy_bodies.append({"x" : head["x"], "y": head["y"] - 1})
       else:
-        copy_bodies[i] = origin_bodies[i-1]
+        copy_bodies.append(origin_bodies[i-1])
+
 
   if next_move == "left":
     for i in range(len(origin_bodies)): 
       if i == 0:
-        copy_bodies[0] == {"x" : head["x"] - 1, "y": head["y"]}
+        copy_bodies.append({"x" : head["x"] - 1, "y": head["y"]})
       else:
-        copy_bodies[i] = origin_bodies[i-1]
+        copy_bodies.append(origin_bodies[i-1])
+
 
   if next_move == "right":
     for i in range(len(origin_bodies)): 
       if i == 0:
-        copy_bodies[0] == {"x" : head["x"] + 1, "y": head["y"] + 1}
+        copy_bodies.append({"x" : head["x"] + 1, "y": head["y"] + 1})
       else:
-        copy_bodies[i] = origin_bodies[i-1]
+        copy_bodies.append(origin_bodies[i-1])
 
+  print("copy and original body**********")
+  print(origin_bodies)
+  print(copy_bodies)
   return copy_bodies
 ## end of the function  
 
@@ -103,21 +108,34 @@ def choose_move(data: dict) -> str:
     board_height = data["board"]["height"]
     board_width = data["board"]["width"]
 
-    if data["you"]["head"]["x"] == 0:
-      possible_moves.remove("left")
+    try:
+      if data["you"]["head"]["x"] == 0:
+        possible_moves.remove("left")
+    except:
+      print()
 
-    if data["you"]["head"]["x"] == board_width - 1:
-      possible_moves.remove("right")
+    try:
+      if data["you"]["head"]["x"] == board_width - 1:
+        possible_moves.remove("right")
+    except:
+      print()
 
-    if data["you"]["head"]["y"] == 0:
-      possible_moves.remove("down")
+    try:
+      if data["you"]["head"]["y"] == 0:
+        possible_moves.remove("down")
+    except:
+      print()
 
-    if data["you"]["head"]["y"] == board_height - 1:
-      possible_moves.remove("up")
+    try:
+      if data["you"]["head"]["y"] == board_height - 1:
+        possible_moves.remove("up")
+    except:
+      print()
 
     # TODO Using information from 'data', don't let your Battlesnake pick a move that would hit its own body
 
     for move in possible_moves:
+
       if move == "up":
         next_body = get_next_body(data["you"]["body"], "up")
         next_head = next_body[0]
@@ -126,7 +144,10 @@ def choose_move(data: dict) -> str:
         next_body_from_3 = np.array(next_body)[3:]
 
         if next_head in next_body_from_3:
-          possible_moves.remove("up")
+          try:
+            possible_moves.remove("up")
+          except:
+            print()
 
       if move == "down":
         next_body = get_next_body(data["you"]["body"], "down")
@@ -136,7 +157,10 @@ def choose_move(data: dict) -> str:
         next_body_from_3 = np.array(next_body)[3:]
 
         if next_head in next_body_from_3:
-          possible_moves.remove("down")
+          try:
+            possible_moves.remove("down")
+          except:
+            print()
 
       if move == "left":
         next_body = get_next_body(data["you"]["body"], "left")
@@ -146,17 +170,24 @@ def choose_move(data: dict) -> str:
         next_body_from_3 = np.array(next_body)[3:]
 
         if next_head in next_body_from_3:
-          possible_moves.remove("left")
+          try:
+            possible_moves.remove("left")
+          except:
+            print()
           
       if move == "right":
-          next_body = get_next_body(data["you"]["body"], "right")
-          next_head = next_body[0]
+        next_body = get_next_body(data["you"]["body"], "right")
+        next_head = next_body[0]
+
 
         # head does not collide with own head, first, second body
         next_body_from_3 = np.array(next_body)[3:]
 
         if next_head in next_body_from_3:
-          possible_moves.remove("right")
+          try:
+            possible_moves.remove("right")
+          except:
+            print()
 
     # TODO: Using information from 'data', don't let your Battlesnake pick a move that would collide with another Battlesnake
 
@@ -167,14 +198,15 @@ def choose_move(data: dict) -> str:
     foods = data["board"]["food"]
 
     distance_to_foods = []
-    head_distance = my_head["x"] + my_head["y"]
 
     index = 0
     closest_food_index = 0
 
     for food in foods:
-      food_distance = food["x"] + food["y"] 
-      distance_to_food = abs(food_distance-head_distance)
+      distance_to_food_x = abs(food["x"]-my_head["x"])
+      distance_to_food_y = abs(food["y"]-my_head["y"])
+
+      distance_to_food = distance_to_food_x + distance_to_food_y
 
       if(index > 0) :
         if(distance_to_food < distance_to_foods[closest_food_index]):
@@ -183,18 +215,57 @@ def choose_move(data: dict) -> str:
       distance_to_foods.append(distance_to_food)
       index += 1
 
-    closest_food = distance_to_foods[closest_food_index]
+    closest_food = foods[closest_food_index]
+
     # 2. choose move toward the food
     try:
-      if(closest_food["x"] > my_head["X"]):
+      if(closest_food["y"] == my_head["y"]):
         possible_moves.remove("down")
-      elif(closest_food["x"] < my_head["X"]):
-        possible_moves.remove("up")
-      if(closest_food["y"] > my_head["y"]):
-        possible_moves.remove("left")
-      elif(closest_food["y"] < my_head["y"]):
-        possible_moves.remove("right"))
     except:
+      print()
+
+    try:
+      if(closest_food["y"] == my_head["y"]):
+        possible_moves.remove("up")
+    except:
+      print()
+
+    try:
+      if(closest_food["y"] > my_head["y"]):
+        possible_moves.remove("down")
+    except:
+      print()
+
+    try:
+      if(closest_food["y"] < my_head["y"]):
+        possible_moves.remove("up")
+    except:
+      print()
+
+    try:
+      if(closest_food["x"] == my_head["x"]):
+        possible_moves.remove("left")
+    except:
+      print()
+
+    try:
+      if(closest_food["x"] == my_head["x"]):
+        possible_moves.remove("right")
+    except:
+      print()
+
+    try:
+      if(closest_food["x"] > my_head["x"]):
+        possible_moves.remove("left")
+    except:
+      print()
+
+    try:      
+      if(closest_food["x"] < my_head["x"]):
+        possible_moves.remove("right")
+    except:
+      print()
+
     # Choose a random direction from the remaining possible_moves to move in, and then return that move
     move = random.choice(possible_moves)
     # TODO: Explore new strategies for picking a move that are better than random
