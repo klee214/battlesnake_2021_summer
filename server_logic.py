@@ -37,20 +37,38 @@ def get_next_body(origin_bodies, next_move):
       else:
         copy_bodies.append(origin_bodies[i-1])
 
-
   if next_move == "right":
     for i in range(len(origin_bodies)): 
       if i == 0:
-        copy_bodies.append({"x" : head["x"] + 1, "y": head["y"] + 1})
+        copy_bodies.append({"x" : head["x"] + 1, "y": head["y"]})
       else:
         copy_bodies.append(origin_bodies[i-1])
-
-  print("copy and original body**********")
-  print(origin_bodies)
-  print(copy_bodies)
   return copy_bodies
 ## end of the function  
 
+## Avoiding dead end
+def avoid_dead_end(body_data, moves):
+  head = body_data[0]
+  x_exit = 0
+  y_exit = 0
+
+  for data in body_data:
+    x_exit += data["x"] - head["x"]
+    y_exit += data["y"] - head["y"]
+
+    for move in moves[3:]:
+      if((move == "up" and head["y"] + 1 == data["y"]) or (move == "down" and head["y"] -1 == data["y"])):
+        if(x_exit > 0) :
+          return "left"
+        if(x_exit < 0) : 
+          return "right"
+      if((move == "right" and head["x"] + 1 == data["x"]) or (move == "left" and head["x"] -1 == data["x"])):
+        if(x_exit > 0) :
+          return "down"
+        if(x_exit < 0) : 
+          return "up"
+
+  return "nothing"
 
 def avoid_my_neck(my_head: Dict[str, int], my_body: List[dict], possible_moves: List[str]) -> List[str]:
     """
@@ -133,8 +151,27 @@ def choose_move(data: dict) -> str:
       print()
 
     # TODO Using information from 'data', don't let your Battlesnake pick a move that would hit its own body
+    right_count = 0
+    left_count = 0
 
-    for move in possible_moves:
+    up_count = 0
+    down_count = 0
+
+    for body in data["you"]["body"]:
+      if(body["x"] > data["you"]["head"]["x"]):
+        right_count += 1
+      elif(body["x"] < data["you"]["head"]["x"]) :
+        left_count += 1
+
+    for body in data["you"]["body"]:
+      if(body["y"] > data["you"]["head"]["y"]):
+        up_count += 1
+      elif(body["y"] < data["you"]["head"]["y"]) :
+        down_count += 1
+    
+    moving_loop = possible_moves.copy()
+
+    for move in moving_loop:
 
       if move == "up":
         next_body = get_next_body(data["you"]["body"], "up")
@@ -146,6 +183,13 @@ def choose_move(data: dict) -> str:
         if next_head in next_body_from_3:
           try:
             possible_moves.remove("up")
+          except:
+            print()
+          try:
+            if(right_count > left_count):
+              possible_moves.remove("right")
+            elif(right_count < left_count):
+              possible_moves.remove("left")
           except:
             print()
 
@@ -161,6 +205,13 @@ def choose_move(data: dict) -> str:
             possible_moves.remove("down")
           except:
             print()
+          try:
+            if(right_count > left_count):
+              possible_moves.remove("right")
+            elif(right_count < left_count):
+              possible_moves.remove("left")
+          except:
+            print()
 
       if move == "left":
         next_body = get_next_body(data["you"]["body"], "left")
@@ -172,6 +223,13 @@ def choose_move(data: dict) -> str:
         if next_head in next_body_from_3:
           try:
             possible_moves.remove("left")
+          except:
+            print()
+          try:
+            if(up_count > down_count):
+              possible_moves.remove("up")
+            elif(up_count < down_count):
+              possible_moves.remove("down")
           except:
             print()
           
@@ -188,6 +246,22 @@ def choose_move(data: dict) -> str:
             possible_moves.remove("right")
           except:
             print()
+          try:
+            if(up_count > down_count):
+              possible_moves.remove("up")
+            elif(up_count < down_count):
+              possible_moves.remove("down")
+          except:
+            print()
+
+    # isDeadEnd = avoid_dead_end(data["you"]["body"], possible_moves)
+  
+    # try:
+    #   if(isDeadEnd != "nothing"):
+    #     possible_moves.remove(isDeadEnd)
+    # except:
+    #   print()
+
 
     # TODO: Using information from 'data', don't let your Battlesnake pick a move that would collide with another Battlesnake
 
@@ -218,53 +292,57 @@ def choose_move(data: dict) -> str:
     closest_food = foods[closest_food_index]
 
     # 2. choose move toward the food
+    recommend_possible_moves = possible_moves.copy()
     try:
       if(closest_food["y"] == my_head["y"]):
-        possible_moves.remove("down")
+        recommend_possible_moves.remove("down")
     except:
       print()
 
     try:
       if(closest_food["y"] == my_head["y"]):
-        possible_moves.remove("up")
+        recommend_possible_moves.remove("up")
     except:
       print()
 
     try:
       if(closest_food["y"] > my_head["y"]):
-        possible_moves.remove("down")
+        recommend_possible_moves.remove("down")
     except:
       print()
 
     try:
       if(closest_food["y"] < my_head["y"]):
-        possible_moves.remove("up")
+        recommend_possible_moves.remove("up")
     except:
       print()
 
     try:
       if(closest_food["x"] == my_head["x"]):
-        possible_moves.remove("left")
+        recommend_possible_moves.remove("left")
     except:
       print()
 
     try:
       if(closest_food["x"] == my_head["x"]):
-        possible_moves.remove("right")
+        recommend_possible_moves.remove("right")
     except:
       print()
 
     try:
       if(closest_food["x"] > my_head["x"]):
-        possible_moves.remove("left")
+        recommend_possible_moves.remove("left")
     except:
       print()
 
     try:      
       if(closest_food["x"] < my_head["x"]):
-        possible_moves.remove("right")
+        recommend_possible_moves.remove("right")
     except:
       print()
+
+    if(len(recommend_possible_moves) != 0):
+      possible_moves = recommend_possible_moves
 
     # Choose a random direction from the remaining possible_moves to move in, and then return that move
     move = random.choice(possible_moves)
